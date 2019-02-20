@@ -33,7 +33,7 @@ class App extends Component {
     } else if (this.state.dashboard) {
       body = <Dashboard/>;
     } else {
-      body = <SigninForm/>;
+      body = <SigninForm onSuccessfulLogin={this.onSuccessfulLogin}/>;
     }
     return (
       <div className="App">

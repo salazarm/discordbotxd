@@ -1,19 +1,13 @@
-var express = require('express');
-var router = express.Router();
-
-/* GET users listing. */
-router.get('/bot', function(req, res, next) {
-	// Comment out this line:
-  //res.send('respond with a resource');
-
-  // And insert something like this instead:
-  res.json([{
-  	id: 1,
-  	username: "samsepi0l"
-  }, {
-  	id: 2,
-  	username: "D0loresH4ze"
-  }]);
-});
-
-module.exports = router;
+module.exports = function(app) {
+  app.get('/bot', function(req, res, next) {
+    // Do Sign in stuff
+    // if signed in then redirect to dashboard
+    res.json([{
+      id: 1,
+      username: "samsepi0l"
+    }, {
+      id: 2,
+      username: "D0loresH4ze"
+    }]);
+  });
+}
