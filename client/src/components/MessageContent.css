@@ -1,0 +1,8 @@
+.MessageContent {
+  margin: 8px;
+}
+
+.MessageContent textarea {
+  width: 100%;
+  min-height: 250px;
+}

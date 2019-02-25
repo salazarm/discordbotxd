@@ -1,0 +1,27 @@
+.ExcludedGroups-group {
+  background-color: #222;
+  border-radius: 5px;
+  padding: 8px;
+  margin: 8px;
+  cursor: pointer;
+}
+
+.ExcludedGroups-group:hover {
+  background-color: #111;
+}
+
+.ExcludedGroups-selected-group {
+  text-decoration: line-through;
+  background-color: #111;
+}
+
+.ExcludedGroups-selected-group:before {
+  content: "☒";
+  display: inline-block;
+}
+
+.Exclude-groups-none {
+  margin: 8px 0px;
+  font-style: italic;
+  font-size: 12px;
+}

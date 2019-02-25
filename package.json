@@ -8,6 +8,7 @@
   "dependencies": {
     "chromedriver": "^2.46.0",
     "cookie-parser": "~1.4.3",
+    "crypto": "^1.0.1",
     "debug": "~2.6.9",
     "express": "~4.16.0",
     "express-session": "^1.15.6",
@@ -17,5 +18,5 @@
     "performance-now": "^2.1.0",
     "selenium-webdriver": "^4.0.0-alpha.1",
     "ws": "^6.1.4"
-  }
+  },
 }

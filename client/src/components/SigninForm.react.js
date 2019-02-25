@@ -8,25 +8,12 @@ class SigninForm extends Component {
     this.password = React.createRef();
   }
 
+  componentDidMount() {
+    this.onSubmit();
+  }
+
   onSubmit = () => {
-    this.setState({loggingIn: true});
-    fetch('/signin', {
-      method: 'POST',
-      body: JSON.stringify({
-        email: this.email.current.value,
-        password: this.password.current.value,
-      }),
-      headers:{
-        'Content-Type': 'application/json'
-      },
-    }).then(res => res.json())
-    .then((data) => {
-      if (data.dashboard) {
-        this.props.onSuccessfulLogin(data.dashboard);
-      } else {
-        this.setState({error: data.error});
-      }
-    })
+    this.props.login(this.email.current.value, this.password.current.value);
   }
 
   render() {

@@ -1,3 +1,110 @@
+body {
+  background-color: #282b30;
+}
 .Dashboard {
+}
+
+.Dashboard {
+  color: white;
+  margin: 0px 20px;
+}
+
+.Dashboard-header {
+  background-color: rgb(54, 57, 63);
+  height: 48px;
+  font-family: 'Open Sans', sans-serif;
+  color: #555;
+  text-decoration: none;
+  text-transform: uppercase;
+  font-size: 40px;
+  font-weight: 800;
+  letter-spacing: -3px;
+  line-height: 1;
   text-align: center;
+  text-shadow: #EDEDED 3px 2px 0;
+  position: relative;
+  border-radius: 4px;
+  margin-top: 10px;
+}
+.Dashboard-header:after {
+  content:"Carbon Fuschia";
+  position: absolute;
+  left: 0;
+  right: 0;
+  margin-left: auto;
+  margin-right: auto;
+  margin-top: -40px;
+  z-index: 99;
+}
+.Dashboard-header:after {
+  /*background: url(https://subtlepatterns.com/patterns/crossed_stripes.png) repeat;*/
+  background-image: -webkit-linear-gradient(left top, transparent 0%, transparent 25%, #FF0080 25%, #FF0080 50%, transparent 50%, transparent 75%, #FF0080 75%);
+  background-size: 4px 4px;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  display: block;
+  text-shadow: none;
+}
+
+.Dashboard-container {
+  margin-top: 10px;
+}
+
+.Dashboard-bots-pane {
+  float: left;
+  width: 190px;
+  margin-right: 10px;
+  min-height: 500px;
+}
+
+.Dashboard-main-pane {
+  background-color: #333;
+  min-height: 500px;
+  width: calc(100% - 200px);
+  float: left;
+}
+
+.Dashboard-bot-header {
+  text-align: left;
+  clear: both;
+}
+
+.Dashboard-bots-title {
+  display: inline-block;
+  float: left;
+  background-color: #282828;
+  width: calc(100% - 60px);
+}
+
+.Dashboard-bots-addbot {
+  border-radius: 2px;
+  background-color: #303030;
+  cursor: pointer;
+  display: inline-block;
+  width: 60px;
+  font-size: 12px;
+  text-align: center;
+  vertical-align: middle;
+}
+.Dashboard-bots-addbot-now-allowed {
+  cursor: not-allowed;
+}
+
+.Dashboard-bots-addbot:hover {
+  background-color: #111;
+}
+
+.Bot {
+  background-color: #333;
+  border-radius: 2px;
+  padding: 2px 5px;
+}
+
+.Bot:hover {
+  background-color: #282828;
+  cursor: pointer;
+}
+
+.Bot-name {
+
 }

@@ -1,0 +1,63 @@
+.Channel {
+  background-color: #222;
+  padding: 8px 16px;
+  display: inline-block;
+  border-radius: 5px;
+  margin: 8px;
+  position: relative;
+  cursor: pointer;
+}
+
+.noClick {
+  cursor: default!important;
+}
+
+.Channel:hover:after {
+  position: absolute;
+  top: 0px;
+  left: 0px;
+  content: attr(data-name);
+  font-size: 12px;
+  background-color: rgba(0,0,0,0.6);
+  border-radius: 5px;
+  padding: 4px;
+  z-index: 99;
+  width: calc(100% - 8px);
+  word-wrap: break-word;
+}
+
+.Channel:hover {
+  background-color: #fff;
+}
+
+.Channel-icon {
+  height: 50px;
+  width: 50px;
+  background-clip: padding-box;
+  background-color: none;
+  background-position: 50%;
+  background-size: 100% 100%;
+  position: relative;
+  border-radius: 25px;
+  display: inline-block;
+  vertical-align: top;
+}
+
+.Channel-no-icon {
+  height: 50px;
+  width: 50px;
+  position: relative;
+  border-radius: 25px;
+  background-color: #333;
+  line-height: 50px;
+  text-align: center;
+  vertical-align: top;
+  display: inline-block;
+}
+
+.MessageOfflineUsers {
+  font-style: italic;
+  font-size: 12px;
+  margin-bottom: 8px;
+  text-align: center;
+}

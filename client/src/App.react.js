@@ -2,6 +2,10 @@ import React, { Component } from 'react';
 import './App.css';
 import getCookie from './lib/getCookie';
 
+import dashboardResponse from './redux/actions/dashboardResponse.js';
+import signinAction from './redux/actions/signin.js';
+
+import AppStore from './redux/stores/AppStore.js'
 import Dashboard from './components/Dashboard.react.js';
 import SigninForm from './components/SigninForm.react.js';
 import LoadingSpinner from './components/LoadingSpinner.react.js';
@@ -16,24 +20,46 @@ class App extends Component {
     if (session) {
       fetch('/dashboard')
         .then(res => res.json())
-        .then(dashboard => this.setState({
-          loggingIn: false,
-          dashboard: dashboard,
-        }))
+        .then(dashboard => {
+          AppStore.dispatch(dashboardResponse(dashboard));
+        })
         .catch(() => {
-          document.location.path = ''
+          alert('error');
         });
     }
   }
 
+  componentWillMount() {
+    this.unsubscribe = AppStore.subscribe(() => {
+      const state = AppStore.getState();
+      let pane;
+      if (state.user.status === 'PENDING') {
+        pane = 'LOADING';
+      } else if (state.user.status === 'ONLINE') {
+        pane = 'DASHBOARD';
+      }
+      this.setState({pane});
+    });
+  }
+
+  componentWillUnmount() {
+    this.unsubscribe();
+  }
+
+  login = (email, password) => {
+    signinAction(email, password, AppStore);
+  }
+
   render() {
     let body;
-    if (this.state.loggingIn) {
-      body = <LoadingSpinner/>;
-    } else if (this.state.dashboard) {
+    if (this.state.pane === 'LOADING') {
+      body = (
+        <div className="loader"></div>
+      );
+    } else if (this.state.pane === 'DASHBOARD') {
       body = <Dashboard/>;
     } else {
-      body = <SigninForm onSuccessfulLogin={this.onSuccessfulLogin}/>;
+      body = <SigninForm login={this.login}/>;
     }
     return (
       <div className="App">

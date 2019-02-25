@@ -1,0 +1,16 @@
+
+.CreateJobPane {
+  padding: 8px;
+}
+.CreateJobPane-CreateJob {
+  text-align: left;
+}
+
+.CreateJobPane-options {
+  text-align: left;
+}
+
+.CreateJobPane-no-offline {
+  font-size: 12px;
+  font-style: italic;
+}

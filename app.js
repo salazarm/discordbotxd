@@ -1,4 +1,4 @@
-const DiscordServer = require('./DiscordServer.js');
+const DiscordDriver = require('./api/dashboard/DiscordDriver.js');
 
 const createError = require('http-errors');
 const express = require('express');
@@ -8,8 +8,8 @@ const logger = require('morgan');
 const session = require('express-session');
 
 const dashboardRouter = require('./routes/dashboard');
-const botRouter = require('./routes/bot');
 const signinRouter = require('./routes/signin');
+const jobRouter = require('./routes/job');
 
 const PORT = process.env.PORT || 5000;
 
@@ -22,7 +22,7 @@ app.use(cookieParser());
 
 signinRouter(app);
 dashboardRouter(app);
-botRouter(app);
+jobRouter(app);
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {
@@ -33,7 +33,7 @@ app.use(function(req, res, next) {
 app.use(function(err, req, res, next) {
   // set locals, only providing error in development
   res.locals.message = err.message;
-  res.locals.error = req.app.get('env') === 'development' ? err : {};
+  res.locals.error = err;
 
   // render the error page
   res.status(err.status || 500);
@@ -48,7 +48,7 @@ app.use(session({
 }));
 
 (async function() {
-  await DiscordServer.init(app);
+  await DiscordDriver.init(app);
 })();
 
 module.exports = app;
