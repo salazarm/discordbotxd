@@ -21,7 +21,6 @@
     "selenium-webdriver": "^4.0.0-alpha.1",
     "ws": "^6.1.4",
     "mongodb": "^3.1.13",
-    "morgan": "~1.9.0",
     "passport": "^0.4.0"
   }
 }

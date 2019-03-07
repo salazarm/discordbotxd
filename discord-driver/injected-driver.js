@@ -129,8 +129,7 @@ module.exports = function injectedDriverExtension(token, email, password, selRes
         if (name.includes('ONLINE') || name.includes('OFFLINE')) {
           exit = true;
         } else if (memberGroups.indexOf(name) === -1){
-          memberGroups.push(name);
-          console.log("FOUND: "+name);
+          memberGroups.push(name.split('—')[0]);
         }
       }
 
@@ -140,7 +139,6 @@ module.exports = function injectedDriverExtension(token, email, password, selRes
 
       scrollTop += height / 2;
       scrollTop = Math.min(scrollTop, contentHeight - height);
-      console.log('scrolltop' +scrollTop);
       memberScrollContainer.scrollTop = scrollTop;
       await Driver.nextFrame();
       let add = 10;
