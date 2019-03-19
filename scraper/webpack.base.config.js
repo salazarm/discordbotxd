@@ -1,6 +1,9 @@
 module.exports = {
   entry: {
-    discord: ['babel-polyfill', './src/discord/install.js'],
+    discord: './src/discord/install.js',
+  },
+  output: {
+    library: 'lemmeinyouwilllose',
   },
   module: {
     rules: [

@@ -1,4 +1,5 @@
 module.exports = function injectedDriverExtension(token, email, password, selRes) {
+  const [token, email, password, selRes] = arguments;
   let secret = 'a'+Math.random();
   const Driver = window.InjectedDriverExtension = {
     token,

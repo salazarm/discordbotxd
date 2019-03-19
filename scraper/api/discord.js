@@ -22,16 +22,19 @@ async function readModuleFile(filepath, callback) {
 const DiscordScraperAPI = {
   async genInstallFn() {
     const module = await readModuleFile('../dist/discord.js')
-    const fn = function install(token, email, password, nodeRes) {
-      console.log('in');
-      console.log(email);
-      // const Driver = window.document.lemmeinyouwilllose
-      // Driver.setInfo({ token, email, password })
-      // Driver.genChannels().then(result => {
-        nodeRes({});
-      // });
+    const fn = function install() {
+      '%Module';
+      const [token, email, password, nodeRes] = arguments;
+      const Driver = window.lemmeinyouwilllose;
+      Driver.setInfo({ token, email, password });
+      Driver.genChannels().then(result => {
+        nodeRes(result);
+      });
     }
-    return fn.toString().replace("'%Module'", module)
+    return fn
+      .toString()
+      .match(/function[^{]+\{([\s\S]*)\}$/)[1]
+      .replace("'%Module'", module);
   },
 }
 

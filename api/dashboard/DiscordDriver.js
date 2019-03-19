@@ -1,3 +1,4 @@
+const DiscordScraper = require('../../scraper/api/discord');
 const SocketServer = require('ws').Server;
 
 const crypto = require('crypto');
@@ -57,8 +58,9 @@ class Driver {
       const buttonInput = await driver.findElements(by.xpath("//button[@type='submit']"));
       buttonInput[0].click();
 
+      const installFn = await DiscordScraper.genInstallFn();
       const channels = await driver.executeAsyncScript(
-        injectedDriver,
+        installFn,
         this.id,
         bot.email,
         bot.password,

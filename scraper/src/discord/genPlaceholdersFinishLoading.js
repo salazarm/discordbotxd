@@ -4,7 +4,7 @@ import getMemberScrollContainer from './getMemberScrollContainer'
 import genNextFrame from './genNextFrame'
 
 export default async function genPlaceholdersFinishLoading() {
-  await nextFrame(60)
+  await genNextFrame(60)
   let ap = getAvatarPlaceholder()
   let ms = getMemberScrollContainer()
   let gp = getMemberGroupPlaceholder()
@@ -18,7 +18,7 @@ export default async function genPlaceholdersFinishLoading() {
     if (ms) {
       ms.scrollTop += 1
     }
-    await nextFrame(1000)
+    await genNextFrame(1000)
     ap = getAvatarPlaceholder()
     ms = getMemberScrollContainer()
     gp = getMemberGroupPlaceholder()

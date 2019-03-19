@@ -1,4 +1,5 @@
 import getMemberScrollContainer from "./getMemberScrollContainer";
+import genNextFrame from "./genNextFrame";
 import genPlaceholdersFinishLoading from "./genPlaceholdersFinishLoading";
 
 export default async function genCurrentChannelInfo(end) {
@@ -7,9 +8,9 @@ export default async function genCurrentChannelInfo(end) {
   const memberScrollContainer = getMemberScrollContainer();
   memberScrollContainer.scrollTop = 0;
   memberScrollContainer.scrollTop = 10;
-  await nextFrame();
+  await genNextFrame();
   memberScrollContainer.scrollTop = 0;
-  await nextFrame();
+  await genNextFrame();
   let scrollTop = 0;
   const height = memberScrollContainer.offsetHeight;
   const contentHeight = memberScrollContainer.scrollHeight;

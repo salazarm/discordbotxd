@@ -4,7 +4,7 @@ import genPlaceholdersFinishLoading from './genPlaceholdersFinishLoading'
 
 export default async function genLoadChannel(channel) {
   while (!getChannelLink(channel)) {
-    await nextFrame(500)
+    await genNextFrame(500)
   }
   getChannelLink(channel).click()
   await genPlaceholdersFinishLoading()

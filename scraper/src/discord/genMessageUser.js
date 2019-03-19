@@ -1,3 +1,6 @@
+import genNextFrame from './genNextFrame';
+import getUserName from './getUserName';
+
 export default async function messageUser(userDiv) {
   let contextMenu;
   let _start = performance.now();
@@ -21,7 +24,7 @@ export default async function messageUser(userDiv) {
       null
     );
     userDiv.dispatchEvent(e);
-    await nextFrame(300);
+    await genNextFrame(300);
     if (_start - performance.now() > 12000) {
       console.log("stuck waiting on ctx");
     }
@@ -50,13 +53,13 @@ export default async function messageUser(userDiv) {
       .evaluate("//textarea[contains(@placeholder, 'Message')]", document)
       .iterateNext())
   ) {
-    await nextFrame(60);
+    await genNextFrame(60);
   }
 
   while (performance.now() - lastMessageTS < messageDelay - 2500) {
-    await nextFrame(60);
+    await genNextFrame(60);
   }
-  await nextFrame(Math.random() * 5000);
+  await genNextFrame(Math.random() * 5000);
   lastMessageTS = performance.now();
   input.value = message;
   console.log("requesting assist for" + getUserName(userDiv));
