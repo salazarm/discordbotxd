@@ -4,10 +4,6 @@
     "react"
   ],
   "parser": "babel-eslint",
-  "rules": {
-    "prettier/prettier": "error",
-    "no-console": [1]
-  },
   "extends": [
     "plugin:react/recommended"
   ],

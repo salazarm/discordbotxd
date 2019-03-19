@@ -1,3 +1,7 @@
+import genPlaceholdersFinishLoading from './genPlaceholdersFinishLoading';
+import getMemberScrollContainer from './getMemberScrollContainer';
+import getVisibleNodes from './getVisibleNodes';
+
 export default async function genBinarySearchFind(searchName, lo, hi) {
   const mid = Math.floor((lo + hi) / 2);
   if (hi - lo > WINDOW_HEIGHT - 1000) {
@@ -7,7 +11,7 @@ export default async function genBinarySearchFind(searchName, lo, hi) {
     getMemberScrollContainer().scrollTop = lo;
     console.log("set lo");
   }
-  await placeholdersFinishLoading();
+  await genPlaceholdersFinishLoading();
   const visibleNodes = getVisibleNodes(lo, hi);
   if (visibleNodes.length === 0) {
     if (mid === hi) {

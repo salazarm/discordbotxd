@@ -9,11 +9,20 @@ const webdriver = require('selenium-webdriver');
 const chromedriver = require('chromedriver');
 const by = webdriver.By;
 
+const prefs = new webdriver.logging.Preferences();
+prefs.setLevel(webdriver.logging.Type.BROWSER, webdriver.logging.Level.ALL);
+prefs.setLevel(webdriver.logging.Type.CLIENT, webdriver.logging.Level.ALL);
+prefs.setLevel(webdriver.logging.Type.DRIVER, webdriver.logging.Level.ALL);
+prefs.setLevel(webdriver.logging.Type.SERVER, webdriver.logging.Level.ALL);
+
+
 const chromeCapabilities = webdriver.Capabilities.chrome();
 chromeCapabilities.set('chromeOptions', {args: ['--headless', '--window-size=1920,5080']});
 chromeCapabilities.set('timeouts', {
   script: 60000,
 });
+chromeCapabilities.setLoggingPrefs(prefs);
+webdriver.logging.installConsoleHandler();
 let wss;
 
 let _driversByToken = {};

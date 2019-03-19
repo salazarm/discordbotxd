@@ -1,5 +1,5 @@
 import getMemberScrollContainer from "./getMemberScrollContainer";
-import placeholdersFinishLoading from "./placeholdersFinishLoading";
+import genPlaceholdersFinishLoading from "./genPlaceholdersFinishLoading";
 
 export default async function genCurrentChannelInfo(end) {
   const seen = {};
@@ -51,10 +51,10 @@ export default async function genCurrentChannelInfo(end) {
     }
     scrollTop = Math.min(scrollTop, contentHeight - height);
     getMemberScrollContainer().scrollTop = scrollTop;
-    await placeholdersFinishLoading();
+    await genPlaceholdersFinishLoading();
   } while (scrollTop < contentHeight - height);
   getMemberScrollContainer().scrollTop = 0;
-  await placeholdersFinishLoading();
+  await genPlaceholdersFinishLoading();
   return {
     memberGroups: memberGroups
   };

@@ -1,16 +1,18 @@
-import genChannels from './genChannels'
-import genMessageChannelUsers from './genMessageChannelUsers'
-import genNextFrame from './genNextFrame'
+import genChannelInfo from './genChannelInfo';
+import genChannels from './genChannels';
+import genMessageChannelUsers from './genMessageChannelUsers';
+import genNextFrame from './genNextFrame';
 
 export default async function injectedDriverExtensionInstall() {
   let info = {}
   const Driver = {
     setInfo(info) {
-      info = info
+      info = info;
     },
     getInfo() {
-      return info
+      return info;
     },
+    genChannelInfo: genChannelInfo,
     genChannels: genChannels,
     genMessageChannelUsers: genMessageChannelUsers,
   }

@@ -1,3 +1,8 @@
+import genFindNext from './genFindNext';
+import getCurrentChannelInfo from './getCurrentChannelInfo';
+import getGroupOffsets from './getGroupOffsets';
+import getMemberScrollContainer from './getMemberScrollContainer';
+
 export default async function genNextMember(processed, currentGroup) {
   if (!processed.length) {
     // First iteration... use the first div...
@@ -12,7 +17,7 @@ export default async function genNextMember(processed, currentGroup) {
   const name = typeof prev.member === "string" ? prev.member : "";
   const channelInfo = await getCurrentChannelInfo("ONLINE");
   const [startOffset, endOffset] = getGroupOffsets(channelInfo, currentGroup);
-  const next = await findNext(name, startOffset, endOffset);
+  const next = await genFindNext(name, startOffset, endOffset);
 
   if (next) {
     return { next: next };
