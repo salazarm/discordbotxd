@@ -12,7 +12,7 @@ const getChannelMemberGroups = function(path, store) {
     .then((data) => {
       store.dispatch(setChannelMemberGroups({
         path: path2,
-        groups: data.memberGroups,
+        groups: data.memberGroups.map(group => group.name),
       }));
     });
 }

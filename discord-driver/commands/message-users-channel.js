@@ -1,4 +1,5 @@
 module.exports = async function op(params, res) {
+  const WINDOW_HEIGHT = 5080;
   const {
     excludedGroups,
     message,
@@ -18,7 +19,7 @@ module.exports = async function op(params, res) {
     });
   }
 
-  async function getCurrentChannelInfo() {
+  async function getCurrentChannelInfo(end) {
     const seen = {};
     const memberGroups = [];
     const memberScrollContainer = getMemberScrollContainer();
@@ -30,6 +31,7 @@ module.exports = async function op(params, res) {
     let scrollTop = 0;
     const height = memberScrollContainer.offsetHeight;
     const contentHeight = memberScrollContainer.scrollHeight;
+    let lastGroup = null;
     do {
       // get member groups
       const memberGroupSpans = document.evaluate(
@@ -40,18 +42,15 @@ module.exports = async function op(params, res) {
       let exit = false;
       while(group = memberGroupSpans.iterateNext()) {
         let name = group.innerText;
-        if (name.includes('OFFLINE')) {
-          console.log("FOUND OFFLINE");
-          name = "OFFLINE";
-        }
         if (!seen[name]){
-          const rect = group.getClientRects()[0];
-          console.log('rect,'+JSON.stringify(rect));
-          memberGroups.push({
-            name: name.split('—')[0],
-            offset: getMemberScrollContainer().scrollTop + rect.top,
-          });
-          if (name.includes('OFFLINE')) {
+          seen[name] = true;
+          const [groupName, userCount] = name.split('—');
+          lastGroup = {
+            name: groupName,
+            userCount: parseInt(userCount),
+          };
+          memberGroups.push(lastGroup);
+          if (groupName.includes('ONLINE')) {
             exit = true;
             break;
           }
@@ -62,27 +61,18 @@ module.exports = async function op(params, res) {
         break;
       }
 
-      scrollTop += height / 2;
-      scrollTop = Math.min(scrollTop, contentHeight - height);
-      memberScrollContainer.scrollTop = scrollTop;
-      await nextFrame();
-      let add = 10;
-      window.started = window.started || performance.now();
-      while(getAvatarPlaceholder()) {
-        memberScrollContainer.scrollTop += add;
-        add *= -1;
-        await nextFrame();
-        if (performance.now() - window.started > 30000) {
-          return {
-            memberGroups: memberGroups,
-          };
-        }
+      if (lastGroup) {
+        scrollTop += (lastGroup.userCount * 42 * 0.98 - height / 2);
+        lastGroup = null;
+      } else {
+        scrollTop += (height * 0.75);
       }
-      memberScrollContainer.scrollTop = scrollTop;
-      await nextFrame();
+      scrollTop = Math.min(scrollTop, contentHeight - height);
+      getMemberScrollContainer().scrollTop = scrollTop;
+      await placeholdersFinishLoading();
     } while (scrollTop < contentHeight - height);
-    memberScrollContainer.scrollTop = 0;
-    await nextFrame();
+    getMemberScrollContainer().scrollTop = 0;
+    await placeholdersFinishLoading();
     return {
       memberGroups: memberGroups,
     };
@@ -125,12 +115,12 @@ module.exports = async function op(params, res) {
   }
 
   async function placeholdersFinishLoading() {
+    await nextFrame(500);
     let ap = getAvatarPlaceholder();
     let ms = getMemberScrollContainer();
     let gp = getMemberGroupPlaceholder();
     let start = performance.now()
     while((ap || !ms || gp)) {
-      console.log('placeholders');
       if (performance.now() - start > 30000) {
         throw new Error('Failed to load channel');
       }
@@ -145,7 +135,6 @@ module.exports = async function op(params, res) {
   }
 
   async function scrollMemberListDown(distance) {
-    console.log('scrolling');
     ms = getMemberScrollContainer();
     ms.scrollTop += distance;
     await nextFrame();
@@ -160,51 +149,57 @@ module.exports = async function op(params, res) {
     return (node.getAttribute('class') || '').indexOf('memberOnline') !== -1
   }
 
-  async function getEstimatedUsers(height) {
+  async function getEstimatedUsers() {
     const channelInfo = await getCurrentChannelInfo();
     const memberGroups = channelInfo.memberGroups;
-    const end = memberGroups.find(g => g.name === 'OFFLINE');
-    let start;
-    for (let i = 0, l = memberGroups.length; i < l; i++) {
-      if (excludedGroups.indexOf(memberGroups[i].name) === -1) {
-        start = memberGroups[i];
-        break;
-      }
-    }
-    if (start && end) {
-      return (end.offset - start.offset) / height;
-    }
-    return null;
+    return memberGroups.reduce(
+      (acc, group) => {
+        if (excludedGroups.indexOf(group.name) === -1) {
+          acc += group.userCount;
+        }
+        return acc;
+      },
+      0
+    );
   }
 
   async function messageUser(userDiv) {
-    const e = element.ownerDocument.createEvent('MouseEvents');
-    e.initMouseEvent(
-      'contextmenu',
-      true, true,
-      element.ownerDocument.defaultView,
-      1, 0, 0, 0, 0,
-      false, false, false, false, 2, null
-    );
-    userDiv.dispatchEvent(e);
-    await nextFrame(60);
-
     let contextMenu;
-    while(!(
+    let _start = performance.now();
+    do {
+      const e = userDiv.ownerDocument.createEvent('MouseEvents');
+      e.initMouseEvent(
+        'contextmenu',
+        true, true,
+        userDiv.ownerDocument.defaultView,
+        1, 0, 0, 0, 0,
+        false, false, false, false, 2, null
+      );
+      userDiv.dispatchEvent(e);
+      await nextFrame(300);
+      if (_start - performance.now() > 12000) {
+        console.log('stuck waiting on ctx');
+      }
+    } while (!(
       contextMenu =
         document
           .evaluate("//div[contains(@class, 'contextMenu')]", document)
           .iterateNext()
-    )) {
-      console.log('waiting for contextmenu');
-      await nextFrame(30);
-    }
+    ))
     const messageButton  =
       document
         .evaluate(".//span[contains(., 'Message')]", contextMenu)
         .iterateNext();
 
-    messageButton.click();
+    try {
+      new Promise((res) => {
+        res();
+        messageButton.click();
+      });
+    } catch(e) {
+      console.log('Error pressing messageButton');
+      return;
+    }
 
     let input;
     while (!(
@@ -221,9 +216,8 @@ module.exports = async function op(params, res) {
     }
     await nextFrame(Math.random() * 5000);
     lastMessageTS = performance.now();
-    console.log('got input');
     input.value = message;
-    console.log('requesting assist');
+    console.log('requesting assist for' + getUserName(userDiv));
     // await getAssist({type: 'submit_message', input: input});
     // await confirmMessageSent();
   }
@@ -242,60 +236,41 @@ module.exports = async function op(params, res) {
     });
   }
 
-  async function getNext(processed, currentGroup) {
-    if (!processed.length) {
-      // First iteration... use the first div...
-      // Skip the div added for lazy scrolling go to index 1.
-      const next = getMemberScrollContainer().children[1];
-      console.log('first,'+next.outerHTML);
-      return {next: next};
-    }
-    const prev = processed[processed.length - 1];
-    if (prev.group) {
-      next = prev.nextSibling;
-      if (!next || next.getAttribute('class').indexOf('member') === -1) {
-        await scrollMemberListUp(2);
-        await scrollMemberListDown(5);
-        await scrollMemberListDown(450);
-        if (
-          !prev ||
-          !prev.nextSibling ||
-          prev.nextSibling.getAttribute('class').indexOf('member') === -1
-        ) {
-          return {exit: true};
-        }
-        next = prev.nextSibling;
-      }
-      return {next: next};
-    }
-    // If the previously processed entry is a member then our scroll position
-    // was reset... find  element.
-    const name = prev.member;
-    const scrollTop = prev.scrollTop;
-  }
 
 
+  let runStart;
+  let realStart;
+  const processed = [];
   async function run() {
+    _bail_completely_ = false;
+    runStart = performance.now();
     const seenMembers = {};
-    const processed = [];
     let currentGroup = '';
 
     await loadChannel(pathname);
-    console.log('loaded '+pathname);
+    getMemberScrollContainer().scrollTop = 0;
+    await placeholdersFinishLoading();
+    realStart = performance.now();
 
     let responsedWithEstimatedTime = false;
     while (true) {
-      if (processed.length === 2 && !responsedWithEstimatedTime) {
-        responsedWithEstimatedTime = true;
-        const estimatedUser = await getEstimatedUsers(processed[1].offsetHeight);
-        const estimatedTime = messageDelay * estimatedUsers;
+      if (processed.filter(f => f.member).length === 10) {
         res({
-          estimatedTime,
-          estimatedUsers,
+          timePerMessage: Math.ceil((performance.now() - realStart)/1000),
         });
       }
 
-      let {next, end} = getNext(processed, currentGroup);
+      if (_bail_completely_) {
+        return;
+      }
+      let {next, end} = await getNext(processed, currentGroup);
+      if (_bail_completely_) {
+        return;
+      }
+      if (!next) {
+        console.log('no next');
+        return;
+      }
       if (end) {
         break;
       }
@@ -303,26 +278,205 @@ module.exports = async function op(params, res) {
       if (isNodeMemberGroup(next)) {
         currentGroup = next.innerText.split('—')[0];
         if (currentGroup === 'OFFLINE') {
+          console.log('complete');
           break;
         }
         console.log('now ' + currentGroup);
-        processed.push({group: currentGroup, node: next});
+        processed.push({
+          group: currentGroup,
+        });
       } else if (isNodeMember(next)) {
         if (excludedGroups.indexOf(currentGroup) === -1) {
-          console.log('found member');
           await messageUser(next);
-          await loadChannel(channel);
+          await loadChannel(pathname);
         } else {
-          console.log('excluded member');
         }
         processed.push({
-          member: getUserName(name),
-          node: next,
-          top: next.getClientRects()[0].top + getMemberScrollContainer().scrollTop,
+          member: getUserName(next),
         });
       }
     }
     console.log('finished processing' + processed.length);
+  }
+
+  async function getNext(processed, currentGroup) {
+    if (!processed.length) {
+      // First iteration... use the first div...
+      // Skip the div added for lazy scrolling go to index 1.
+      const next = getMemberScrollContainer().children[1];
+      console.log('first,'+next.innerHTML);
+      return {next: next};
+    }
+    const prev = processed[processed.length - 1];
+    console.log('on prev'+ logInfo(prev));
+
+    const name = typeof prev.member === 'string' ? prev.member :  "";
+    const channelInfo = await getCurrentChannelInfo('ONLINE');
+    const [startOffset, endOffset] = getGroupOffsets(channelInfo, currentGroup);
+    const next = await findNext(name, startOffset, endOffset);
+
+    if (next) {
+      return {next: next};
+    }
+    return {exit: true};
+  }
+
+  const GROUP_HEIGHT = 40;
+  const MEMBER_HEIGHT = 42;
+  function getGroupOffsets(channelGroupInfo, group) {
+    const groups = channelGroupInfo.memberGroups;
+    let offset = 0;
+    let startOffset = 0;
+    let endOffset = 0;
+    for (let i = 0, l = groups.length; i < l; i++) {
+      offset += GROUP_HEIGHT;
+      startOffset = offset;
+      offset += (MEMBER_HEIGHT * groups[i].userCount);
+      endOffset = offset;
+      if (groups[i].name === group) {
+        return [startOffset, endOffset];
+      }
+    }
+    return [startOffset, endOffset];
+  }
+
+  async function findNext(searchName, startOffset = 0, endOffset) {
+    searchName = searchName.toLowerCase();
+    if (startOffset && endOffset) {
+      const last = await binarySearchFind(searchName, startOffset, endOffset);
+      return last.node.nextSibling;
+    }
+    console.log('no start/end');
+  }
+
+  async function binarySearchFind(searchName, lo, hi) {
+    const mid = Math.floor((lo + hi) / 2);
+    if (hi - lo > WINDOW_HEIGHT - 1000) {
+      getMemberScrollContainer().scrollTop = mid;
+      console.log('set mid')
+    } else {
+      getMemberScrollContainer().scrollTop = lo;
+      console.log('set lo');
+    }
+    await placeholdersFinishLoading();
+    const visibleNodes = getVisibleNodes(lo, hi);
+    if (visibleNodes.length === 0) {
+      if (mid === hi) {
+        console.log('higher than hi');
+        return null;
+      }
+      if (mid === lo) {
+        console.log('lower then low');
+        return null;
+      }
+    }
+
+    const members = visibleNodes.filter(info => info.member);
+    if (!members.length) {
+      console.log('no members searchName' +searchName);
+    }
+
+    const firstMemberName = members[0].member;
+    const lastMemberName = members[members.length -1].member;
+    if (searchName < firstMemberName.toLowerCase()) {
+      if (lo === mid || hi - lo < WINDOW_HEIGHT - 1000) {
+        return members[0];
+      }
+      const newMid = members[0].node.getClientRects()[0].top
+      return await binarySearchFind(searchName, lo, mid - 1);
+    } else if (searchName <= lastMemberName.toLowerCase()) {
+      let lastMember;
+      for (let i = 0, l = members.length; i < l; i++) {
+        const memberName = members[i].member;
+        if (searchName == memberName) {
+          console.log('exact');
+          return members[i];
+        }
+        if (searchName < memberName) {
+          if (i === 0) {
+            console.log('i === 0');
+            alert('hi');
+            return binarySearchFind(lo - 420, mid);
+          }
+          return lastMember;
+        }
+        lastMember = members[i]
+      }
+      return lastMember;
+    } else {
+      if (hi === mid || hi - lo < WINDOW_HEIGHT - 1000) {
+        return members[members.length - 1];
+      }
+      return await binarySearchFind(searchName, mid + 1, hi);
+    }
+  }
+
+  function getVisibleNodes(min = 0, max = Infinity) {
+    const msc = getMemberScrollContainer();
+    const mscTop = msc.getClientRects()[0].top;
+    const nodes = Array.prototype.slice.call(msc.children);
+    const visibleNodes = [];
+    for (let i=0, l=nodes.length; i<l; i++) {
+      const node = nodes[i];
+      const rect = node.getClientRects()[0];
+      let top = rect.top + msc.scrollTop - mscTop;
+      if (top < min) {
+        continue;
+      } else if (top > max) {
+        break;
+      }
+      if (isNodeMember(node)) {
+        visibleNodes.push({
+          node: node,
+          member: getUserName(node),
+        });
+      } else if (isNodeMemberGroup(node)) {
+        visibleNodes.push({
+          node: node,
+          group: node.innerText,
+        });
+      }
+    }
+    return visibleNodes;
+  }
+
+  function getUserName(node) {
+    if (node instanceof Node) {
+      const name = document.evaluate(
+        ".//span[contains(@class, 'usernameOnline')]",
+        node
+      ).iterateNext();
+      if (name) {
+        return name.innerHTML.toLowerCase();
+      }
+    }
+  }
+
+  function logNode(node) {
+    if (node) {
+      return getUserName(node) || node.innerText;
+    }
+    return '<no node>';
+  }
+
+  function logInfo(info) {
+    if (info) {
+      return info.member || info.group;
+    }
+    return '<undefined>';
+  }
+
+  async function estimatedProgress() {
+    const estimatedUsers = await getEstimatedUsers();
+    return ({
+      estimatedTime: messageDelay * estimatedUsers,
+      estimatedUsers,
+    });
+  }
+
+  let _bail_completely_ = false;
+  function stop() {
+    _bail_completely_ = true;
   }
 
   if (document.readyState == 'complete') {

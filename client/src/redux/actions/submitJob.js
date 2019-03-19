@@ -6,24 +6,37 @@ const RESPONSE_TYPE = "JOB_CREATION_RESPONSE";
 const submitJob = function(jobForm, store) {
   const data = jobForm;
   store.dispatch({type: TYPE});
-  fetch('/job', {
-    method: 'POST',
-    body: JSON.stringify({
-      excludedGroups: jobForm.excludeGroups ? jobForm.excludedGroups : [],
-      message: jobForm.message,
-      messageDelay: jobForm.messageDelay,
-      pathname: jobForm.pathname,
-    }),
-    headers:{
-      'Content-Type': 'application/json'
-    },
-  }).then(res => res.json())
-  .then((responseData) => {
-    store.dispatch({
-      type: RESPONSE_TYPE,
-      payload: responseData,
+  let error;
+  try {
+    fetch('/job', {
+      method: 'POST',
+      body: JSON.stringify({
+        excludedGroups: jobForm.excludeGroups ? jobForm.excludedGroups : [],
+        message: jobForm.message,
+        messageDelay: jobForm.messageDelay,
+        pathname: jobForm.pathname,
+      }),
+      headers:{
+        'Content-Type': 'application/json'
+      },
+    }).then(res => {
+      try {
+        return res.json()
+      } catch (e) {
+        error = e;
+      }
+    })
+    .then((responseData) => {
+      if (!error) {
+        store.dispatch({
+          type: RESPONSE_TYPE,
+          payload: responseData,
+        });
+      }
     });
-  });
+  } catch (e) {
+
+  }
 }
 
 submitJob.type = TYPE;

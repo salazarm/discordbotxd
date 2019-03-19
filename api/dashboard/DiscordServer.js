@@ -1,16 +1,21 @@
 const DiscordDriver = require('./DiscordDriver.js');
 
+const settingUp = {};
+
 module.exports = {
   async startServerForUser(user) {
     // TODO: Move to memcache when we scale to a million users
+    if (settingUp[user.id]) {
+      return await settingUp[user.id];
+    }
     const driver = DiscordDriver.get(user);
     if (driver) {
-      if (driver.settingUp) {
-        await driver.settingUp;
-      }
       return driver.getState();
     }
-    return await DiscordDriver.start(user);
+    settingUp[user.id] = DiscordDriver.start(user);
+    const data = await settingUp[user.id];
+    delete settingUp[user.id]
+    return data;
   },
 
   async getBotChannels(user, botEmail) {

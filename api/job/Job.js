@@ -15,7 +15,6 @@ chromeCapabilities.set('timeouts', {
   script: 60000000,
 });
 
-const QUICK_INPUT =  "//input[contains(@class, 'quickMessage')]";
 
 class Job  {
   constructor(params) {
