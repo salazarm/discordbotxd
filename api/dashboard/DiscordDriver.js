@@ -3,8 +3,6 @@ const SocketServer = require('ws').Server;
 
 const crypto = require('crypto');
 const fs = require('fs');
-const injectedDriver = require('../../discord-driver/injected-driver');
-const injectGetChannelInfo = require('../../discord-driver/commands/get-channel-info');
 const now = require("performance-now");
 const webdriver = require('selenium-webdriver');
 const chromedriver = require('chromedriver');
@@ -42,7 +40,7 @@ class Driver {
 
   async start() {
     const bots = [];
-    this.settingUp = await Promise.all(this.bots.map(async (bot) => {
+    this.settingUp = Promise.all(this.bots.map(async (bot) => {
       const driver = new webdriver.Builder()
         .forBrowser('chrome')
         .withCapabilities(chromeCapabilities)
@@ -71,6 +69,7 @@ class Driver {
         channels,
       });
     }));
+    await this.settingUp;
     this.state = {
       bots,
       jobs: [],
@@ -83,8 +82,9 @@ class Driver {
 
   async getBotChannels(bot) {
     const driver = this.botDrivers[bot.email];
+    const getChannelsFn = await DiscordScraper.genChannelsFn();
     return await driver.executeAsyncScript(
-      injectedDriver,
+      getChannelsFn,
       this.id,
       bot.email,
       bot.password,
@@ -99,15 +99,15 @@ class Driver {
     if (driver) {
       let info;
       try {
+        const getChannelInfoFn = await DiscordScraper.genChannelInfo();
         info = await driver.executeAsyncScript(
-          injectGetChannelInfo,
+          getChannelInfoFn,
           channel
         );
       } catch (e) {
+        console.log('error', e);
         return {memberGroups: ['Server Timed Out']};
       }
-      const screenShot = await driver.takeScreenshot();
-      fs.writeFileSync('screenshot.png', new Buffer(screenShot, 'base64'));
       return info;
     }
   }

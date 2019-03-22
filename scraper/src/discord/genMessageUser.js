@@ -1,32 +1,19 @@
+import {genRequestAssist} from './Assist';
+
 import genNextFrame from './genNextFrame';
 import getUserName from './getUserName';
+import triggerRightClickEvent from './triggerRightClickEvent';
 
-export default async function messageUser(userDiv) {
+let lastMessageTS = 0;
+
+export default async function messageUser(userDiv, messageDelay) {
   let contextMenu;
   let _start = performance.now();
   do {
-    const e = userDiv.ownerDocument.createEvent("MouseEvents");
-    e.initMouseEvent(
-      "contextmenu",
-      true,
-      true,
-      userDiv.ownerDocument.defaultView,
-      1,
-      0,
-      0,
-      0,
-      0,
-      false,
-      false,
-      false,
-      false,
-      2,
-      null
-    );
-    userDiv.dispatchEvent(e);
+    triggerRightClickEvent(userDiv);
     await genNextFrame(300);
     if (_start - performance.now() > 12000) {
-      console.log("stuck waiting on ctx");
+      throw new Error("stuck waiting on ctx");
     }
   } while (
     !(contextMenu = document
@@ -63,6 +50,6 @@ export default async function messageUser(userDiv) {
   lastMessageTS = performance.now();
   input.value = message;
   console.log("requesting assist for" + getUserName(userDiv));
-  // await get"requesting assist for"essage', input: input});
+  await genRequestAssist({type: 'submit_message', input: input});
   // await confirmMessageSent();
 }

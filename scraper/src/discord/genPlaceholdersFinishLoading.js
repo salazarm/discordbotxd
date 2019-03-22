@@ -1,26 +1,44 @@
-import getAvatarPlaceholder from './getAvatarPlaceholder'
-import getMemberGroupPlaceholder from './getMemberGroupPlaceholder'
-import getMemberScrollContainer from './getMemberScrollContainer'
-import genNextFrame from './genNextFrame'
+import getAvatarPlaceholder from './getAvatarPlaceholder';
+import getMemberGroupPlaceholder from './getMemberGroupPlaceholder';
+import getMemberScrollContainer from './getMemberScrollContainer';
+import genNextFrame from './genNextFrame';
 
 export default async function genPlaceholdersFinishLoading() {
-  await genNextFrame(60)
-  let ap = getAvatarPlaceholder()
-  let ms = getMemberScrollContainer()
-  let gp = getMemberGroupPlaceholder()
-  let start = performance.now()
-  while (ap || !ms || gp) {
-    console.log('placeholders')
-    if (performance.now() - start > 30000) {
-      console.log('waited 30s for placeholders')
-      throw new Error('Failed to load channel')
+  await genNextFrame(60);
+  let ap = getAvatarPlaceholder();
+  let ms = getMemberScrollContainer();
+  let gp = getMemberGroupPlaceholder();
+  let start = performance.now();
+  let lastLog = start;
+  let add = 3;
+  while (ap || !ms || !ms.children || !ms.children.length  || gp) {
+    const now = performance.now();
+    if (now - start > 30000) {
+      if (ap) {
+        throw new Error('AvatarPlaceholder still visible after 30 seconds');
+      }
+      if (!ms) {
+        throw new Error('MemberScrollContainer missing after 30 seconds');
+      }
+      if (!ms.children || !ms.children.length) {
+        throw new Error('MemberScrollContainer unknown children after 30 seconds');
+      }
+      if (gp) {
+        throw new Error('GroupPlaceholder still visible after 30 seconds');
+      }
+      throw new Error('Failed to load channel');
     }
     if (ms) {
-      ms.scrollTop += 1
+      if (lastLog - now > 1000) {
+        console.log('attempting to move scroll');
+        lastLog = now;
+      }
+      add *= -1;
+      ms.scrollTop += add;
     }
-    await genNextFrame(1000)
-    ap = getAvatarPlaceholder()
-    ms = getMemberScrollContainer()
-    gp = getMemberGroupPlaceholder()
+    await genNextFrame(50);
+    ap = getAvatarPlaceholder();
+    ms = getMemberScrollContainer();
+    gp = getMemberGroupPlaceholder();
   }
 }

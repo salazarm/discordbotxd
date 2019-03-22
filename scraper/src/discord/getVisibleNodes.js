@@ -1,4 +1,7 @@
 import getMemberScrollContainer from "./getMemberScrollContainer";
+import getUserName from "./getUserName";
+import isNodeMember from "./isNodeMember";
+import isNodeMemberGroup from "./isNodeMemberGroup";
 
 export default function getVisibleNodes(min = 0, max = Infinity) {
   const msc = getMemberScrollContainer();
@@ -17,12 +20,14 @@ export default function getVisibleNodes(min = 0, max = Infinity) {
     if (isNodeMember(node)) {
       visibleNodes.push({
         node: node,
-        member: getUserName(node)
+        member: getUserName(node),
+        top: top,
       });
     } else if (isNodeMemberGroup(node)) {
       visibleNodes.push({
         node: node,
-        group: node.innerText
+        group: node.innerText,
+        top: top,
       });
     }
   }

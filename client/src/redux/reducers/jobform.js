@@ -2,7 +2,7 @@ import { createReducer } from 'redux-starter-kit';
 
 import setJobFormAction from '../actions/setJobForm';
 import setChannelMemberGroups from '../actions/setChannelMemberGroups';
-import toggleExcludedGroup from '../actions/toggleExcludedGroup';
+import toggleIncludedGroup from '../actions/toggleIncludedGroup';
 import submitJob from '../actions/submitJob';
 
 const jobReducer = createReducer({}, {
@@ -13,15 +13,15 @@ const jobReducer = createReducer({}, {
   },
   [setChannelMemberGroups.type]: (state, action) => {
     state.channelGroups[action.payload.path] = action.payload.groups;
-    state.excludedGroups = action.payload.groups;
+    state.includedGroups = action.payload.groups.filter(group => group === "ONLINE");
   },
-  [toggleExcludedGroup.type]: (state, action) => {
+  [toggleIncludedGroup.type]: (state, action) => {
     const group = action.payload.group;
-    const groupIndex = state.excludedGroups.indexOf(group);
+    const groupIndex = state.includedGroups.indexOf(group);
     if (groupIndex !== -1) {
-      state.excludedGroups.splice(groupIndex, 1);
+      state.includedGroups.splice(groupIndex, 1);
     } else {
-      state.excludedGroups.push(group);
+      state.includedGroups.push(group);
     }
   },
   [submitJob.type]: (state, action) => {

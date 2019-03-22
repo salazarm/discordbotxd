@@ -6,9 +6,10 @@ const jobRouter = Router();
 module.exports = function(app) {
   app.use('/job', jobRouter);
   jobRouter.post('/', async function(req, res, next) {
-    const {excludedGroups, message, messageDelay, pathname} = req.body;
+    const {includedGroups, message, messageDelay, pathname} = req.body;
+    console.log('body', req.body);
     const job = new Job({
-      excludedGroups,
+      includedGroups,
       message,
       messageDelay,
       pathname,

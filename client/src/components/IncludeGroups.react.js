@@ -1,19 +1,17 @@
-import React, { Component, createRef } from 'react';
-import './ExcludeGroups.css';
+import React, { Component } from 'react';
+import './IncludeGroups.css';
 
 import AppStore from '../redux/stores/AppStore';
-import MessageContent from './MessageContent.react';
 
-import setJobForm from '../redux/actions/setJobForm';
 import getChannelMemberGroups from '../redux/actions/getChannelMemberGroups';
-import toggleExcludedGroup from '../redux/actions/toggleExcludedGroup';
+import toggleIncludedGroup from '../redux/actions/toggleIncludedGroup';
 
-class ExcludeGroups extends Component {
+class IncludeGroups extends Component {
   constructor() {
     super();
-    this.checkbox = createRef();
+    const appState = AppStore.getState();
     this.state = {
-      checked: AppStore.getState().jobForm.excludeGroups
+      groups: appState.groups,
     };
   }
 
@@ -21,7 +19,6 @@ class ExcludeGroups extends Component {
     this.unsubscribe = AppStore.subscribe(() => {
       const state = AppStore.getState();
       this.setState({
-        checked: state.jobForm.excludeGroups,
         groups: state.jobForm.channelGroups[this.props.channel.pathname],
       });
     });
@@ -32,23 +29,11 @@ class ExcludeGroups extends Component {
     this.unsubscribe();
   }
 
-  onChange = () => {
-    const checked = this.checkbox.current.checked;
-    AppStore.dispatch(setJobForm({excludeGroups: checked}));
-    getChannelMemberGroups(this.props.channel.pathname, AppStore);
-  }
-
   render() {
     return (
       <div>
         <label>
-          <input
-            type="checkbox"
-            onChange={this.onChange}
-            checked={this.state.checked}
-            ref={this.checkbox}
-          />
-          Exclude Groups
+          Included Groups
         </label>
         {this.renderGroups()}
       </div>
@@ -56,34 +41,31 @@ class ExcludeGroups extends Component {
   }
 
   renderGroups() {
-    if (!this.state.checked) {
-      return null;
-    }
     if (!this.state.groups) {
       return <div className="loader"/>;
     }
     let content;
     if (this.state.groups.length) {
       content = this.state.groups.map(group =>
-        <ExcludeGroup name={group} />
+        <IncludeGroup name={group} />
       );
     } else {
-      content = <div className="Exclude-groups-none">No groups to exclude</div>;
+      content = <div className="Include-groups-none">No groups to include</div>;
     }
     return (
-      <div className="Exclude-groups">
+      <div className="Include-groups">
         {content}
       </div>
     );
   }
 }
 
-class ExcludeGroup extends Component {
+class IncludeGroup extends Component {
   constructor(props) {
     super(props);
     const state = AppStore.getState();
     this.state = {
-      selected: state.jobForm.excludedGroups.indexOf(props.name) !== -1,
+      selected: state.jobForm.includedGroups.indexOf(props.name) !== -1,
     };
   }
 
@@ -91,7 +73,7 @@ class ExcludeGroup extends Component {
     this.unsubscribe = AppStore.subscribe(() => {
       const state = AppStore.getState();
       this.setState({
-        selected: state.jobForm.excludedGroups.indexOf(this.props.name) !== -1,
+        selected: state.jobForm.includedGroups.indexOf(this.props.name) !== -1,
       });
     });
   }
@@ -100,13 +82,13 @@ class ExcludeGroup extends Component {
     this.unsubscribe();
   }
   onClick = () => {
-    AppStore.dispatch(toggleExcludedGroup({group: this.props.name}));
+    AppStore.dispatch(toggleIncludedGroup({group: this.props.name}));
   }
 
   render() {
-    let klass = "ExcludedGroups-group";
+    let klass = "IncludedGroups-group";
     if (this.state.selected) {
-      klass += " ExcludedGroups-selected-group";
+      klass += " IncludedGroups-selected-group";
     }
     return (
       <div className={klass} onClick={this.onClick}>
@@ -116,4 +98,4 @@ class ExcludeGroup extends Component {
   }
 }
 
-export default ExcludeGroups;
+export default IncludeGroups;

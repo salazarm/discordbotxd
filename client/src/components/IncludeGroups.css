@@ -1,0 +1,33 @@
+.IncludedGroups-group {
+  text-decoration: line-through;
+  background-color: #222;
+  border-radius: 5px;
+  padding: 8px;
+  margin: 8px;
+  cursor: pointer;
+}
+
+.IncludedGroups-group:before {
+  content: "☒";
+  display: inline-block;
+}
+
+.IncludedGroups-group:hover {
+  background-color: #111;
+}
+
+.IncludedGroups-selected-group {
+  background-color: #111;
+  text-decoration: none;
+}
+
+.IncludedGroups-selected-group:before {
+  content: "☑";
+  display: inline-block;
+}
+
+.Include-groups-none {
+  margin: 8px 0px;
+  font-style: italic;
+  font-size: 12px;
+}

@@ -3,7 +3,7 @@
   "version": "0.0.0",
   "private": true,
   "scripts": {
-    "start": "cd scraper && yarn build && cd .. && node bin/www"
+    "start": "node bin/www"
   },
   "dependencies": {
     "chromedriver": "^2.46.0",

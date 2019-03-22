@@ -1,10 +1,10 @@
-import React, { Component, createRef } from 'react';
+import React, { Component } from 'react';
 import './CreateJobPane.css';
 
 import AppStore from '../redux/stores/AppStore';
 import Channel from './Channel.react';
 import ConfirmJob from './ConfirmJob.react';
-import ExcludeGroups from './ExcludeGroups.react';
+import IncludeGroups from './IncludeGroups.react';
 import MessageDelay from './MessageDelay.react';
 import MessageContent from './MessageContent.react';
 
@@ -64,7 +64,7 @@ class CreateJobPane extends Component {
           icon={channel.icon}
         />
         <div className="CreateJobPane-options">
-          <ExcludeGroups channel={channel} />
+          <IncludeGroups channel={channel} />
           <MessageDelay channel={channel} />
         </div>
         <div className="CreateJobPane-content">

@@ -72,36 +72,23 @@ class ConfirmJob extends Component {
 
   renderExecludedGroups() {
     const jobForm = this.state.jobForm;
-    if (!jobForm.excludedGroups.length) {
+    if (!jobForm.includedGroups.length) {
       return (
         <div className="ConfirmJob-excluding">
-          No member groups to exclude
+          No member groups to include
         </div>
       )
     }
-    if (jobForm.excludeGroups) {
-      return (
-        <div className="ConfirmJob-excluding">
-          Excluding the following member groups:
-          <ul>
-            {this.state.jobForm.excludedGroups.map(
-              group => <li>{group}</li>
-            )}
-          </ul>
-        </div>
-      );
-    }
-    const groups = jobForm.channelGroups[jobForm.pathname];
     return (
       <div className="ConfirmJob-excluding">
-        Warning, not excluding the follow groups:
+        WARNING: Including the following member groups.
         <ul>
-          {groups.map(
+          {this.state.jobForm.includedGroups.map(
             group => <li>{group}</li>
           )}
         </ul>
       </div>
-    )
+    );
   }
 }
 

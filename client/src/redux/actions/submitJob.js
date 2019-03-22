@@ -1,5 +1,3 @@
-import startCreateJob from './startCreateJob';
-
 const TYPE = "SUBMIT_JOB";
 const RESPONSE_TYPE = "JOB_CREATION_RESPONSE";
 
@@ -11,10 +9,10 @@ const submitJob = function(jobForm, store) {
     fetch('/job', {
       method: 'POST',
       body: JSON.stringify({
-        excludedGroups: jobForm.excludeGroups ? jobForm.excludedGroups : [],
-        message: jobForm.message,
-        messageDelay: jobForm.messageDelay,
-        pathname: jobForm.pathname,
+        includedGroups: data.includedGroups,
+        message: data.message,
+        messageDelay: data.messageDelay,
+        pathname: data.pathname,
       }),
       headers:{
         'Content-Type': 'application/json'

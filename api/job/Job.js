@@ -1,13 +1,11 @@
+const DiscordScraper = require('../../scraper/api/discord');
+
 const fs = require('fs');
 const now = require("performance-now");
 const webdriver = require('selenium-webdriver');
 const chromedriver = require('chromedriver');
 const by = webdriver.By;
 const Keys = webdriver.Key;
-
-const messageUsersChannel = require('../../discord-driver/commands/message-users-channel');
-const messageUsersChannelAssist = require('../../discord-driver/commands/message-users-channel-assist');
-const messageUsersChannelAssistResponse = require('../../discord-driver/commands/message-users-channel-assist-response');
 
 const chromeCapabilities = webdriver.Capabilities.chrome();
 chromeCapabilities.set('chromeOptions', {args: ['--headless', '--window-size=1920,5080']});
@@ -40,8 +38,10 @@ class Job  {
     const buttonInput = await driver.findElements(by.xpath("//button[@type='submit']"));
     buttonInput[0].click();
 
+    const messageUsersChannelFn = await DiscordScraper.genMessageChannelUsersFn();
+    console.log('messageUsersChannel with:', params);
     const res = await driver.executeAsyncScript(
-      messageUsersChannel,
+      messageUsersChannelFn,
       params
     );
     this.assist(driver);
@@ -51,24 +51,36 @@ class Job  {
   async assist(driver) {
     let exit = false;
     while (!exit) {
-      console.log('waiting for command');
-      const command = await driver.executeAsyncScript(
-        messageUsersChannelAssist
+      try {
+        exit = await this.assistImpl();
+        // do nothing if its a script timeout
+      } catch (error) {
+        console.log("Assist hit error", error);
+      }
+    }
+  }
+
+  async assistImpl() {
+    console.log('waiting for command');
+    const receiveAssist = await DiscordScraper.genReceveAssistRequestFn();
+    const command = await driver.executeAsyncScript(receiveAssist);
+    if (command.exit) {
+      return true;
+    }
+    if (command.type === 'submit_message') {
+      console.log('submit_message_command');
+      // const input = await driver.findElements(by.xpath(QUICK_INPUT));
+      // await input[0].sendKeys(Keys.ENTER);
+      const response = await DiscordScraper.genAssistRequestResponseFn();
+      driver.executeAsyncScript(
+        messageUsersChannelAssistResponse,
+        {success: true},
       );
-      if (command.exit) {
-        break;
-      }
-      if (command.type === 'submit_message') {
-        console.log('submit_message_command');
-        const screenShot = await driver.takeScreenshot();
-        const input = await driver.findElements(by.xpath(QUICK_INPUT));
-        await input[0].sendKeys(Keys.ENTER);
-        const screenShot2 = await driver.takeScreenshot();
-        driver.executeAsyncScript(
-          messageUsersChannelAssistResponse,
-          {success: true},
-        );
-      }
+    }
+    if (command.type === 'screenshot') {
+      console.log('took screenshot');
+      const screenShot = await driver.takeScreenshot();
+      fs.writeFileSync(command.name + '.png', new Buffer(screenShot, 'base64'));
     }
   }
 }

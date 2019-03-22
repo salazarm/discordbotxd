@@ -22,8 +22,7 @@ const preloadedState = {
     status: 'OFFLINE'
   },
   jobForm: {
-    excludeGroups: true,
-    excludedGroups: [],
+    includedGroups: [],
     messageDelay: 20,
     channelGroups: {},
     confirming: false,

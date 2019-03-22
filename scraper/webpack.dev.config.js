@@ -6,9 +6,9 @@ const webpack = require('webpack')
 module.exports = merge(baseConfig, {
   devtool: 'source-map',
   devServer: {
-    hot: true,
-    // enable https to get rid of ws connection failures from injected https pages
-    // https: true,
+    hot: false,
+    inline: false,
+    https: true,
     port: 4000,
     clientLogLevel: 'none',
   },
@@ -21,5 +21,5 @@ module.exports = merge(baseConfig, {
       },
     ],
   },
-  plugins: [new WriteFilePlugin(), new webpack.HotModuleReplacementPlugin()],
+  plugins: [new WriteFilePlugin()],
 })
