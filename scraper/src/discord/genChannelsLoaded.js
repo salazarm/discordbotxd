@@ -1,4 +1,5 @@
 import genNextFrame from "./genNextFrame";
+import { logMessage } from "./logger";
 
 export default async function genChannelsLoaded() {
   await new Promise(async (res, rej) => {
@@ -10,12 +11,12 @@ export default async function genChannelsLoaded() {
         )
         .iterateNext()
       if (channel) {
-        console.log('channels loaded')
+        logMessage('channels loaded')
         clearInterval(id)
         await genNextFrame(1000)
         res()
       }
-      console.log('waiting for channels')
+      logMessage('waiting for channels')
     }, 1000)
   })
 }

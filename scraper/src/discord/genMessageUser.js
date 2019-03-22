@@ -2,6 +2,7 @@ import {genRequestAssist} from './Assist';
 
 import genNextFrame from './genNextFrame';
 import getUserName from './getUserName';
+import { logMessage } from "./logger";
 import triggerRightClickEvent from './triggerRightClickEvent';
 
 let lastMessageTS = 0;
@@ -30,7 +31,7 @@ export default async function messageUser(userDiv, messageDelay) {
       messageButton.click();
     });
   } catch (e) {
-    console.log("Error pressing messageButton");
+    logMessage("Error pressing messageButton");
     return;
   }
 
@@ -49,7 +50,7 @@ export default async function messageUser(userDiv, messageDelay) {
   await genNextFrame(Math.random() * 5000);
   lastMessageTS = performance.now();
   input.value = message;
-  console.log("requesting assist for" + getUserName(userDiv));
+  logMessage("requesting assist for" + getUserName(userDiv));
   await genRequestAssist({type: 'submit_message', input: input});
   // await confirmMessageSent();
 }

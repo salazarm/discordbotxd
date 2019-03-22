@@ -2,6 +2,7 @@ import getAvatarPlaceholder from './getAvatarPlaceholder';
 import getMemberGroupPlaceholder from './getMemberGroupPlaceholder';
 import getMemberScrollContainer from './getMemberScrollContainer';
 import genNextFrame from './genNextFrame';
+import { logMessage } from "./logger";
 
 export default async function genPlaceholdersFinishLoading() {
   await genNextFrame(60);
@@ -30,7 +31,7 @@ export default async function genPlaceholdersFinishLoading() {
     }
     if (ms) {
       if (lastLog - now > 1000) {
-        console.log('attempting to move scroll');
+        logMessage('attempting to move scroll');
         lastLog = now;
       }
       add *= -1;

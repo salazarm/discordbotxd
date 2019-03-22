@@ -8,6 +8,7 @@ import getMemberScrollContainer from './getMemberScrollContainer';
 import getUserName from './getUserName';
 import isNodeMember from './isNodeMember';
 import isNodeMemberGroup from './isNodeMemberGroup';
+import { logMessage } from './logger';
 
 
 let _runStart;
@@ -21,19 +22,19 @@ async function run(nodeRes) {
   _bail_completely_ = false;
   _runStart = performance.now();
   const seenMembers = {};
-  console.log('loading channel');
+  logMessage('loading channel');
   let currentGroup = "";
   await genLoadChannel(_config.pathname);
   getMemberScrollContainer().scrollTop = 0;
   await genPlaceholdersFinishLoading();
-  console.log('real start');
+  logMessage('real start');
   _realStart = performance.now();
 
   let respondedWithEstimatedTime = false;
   for (const group of _config.includedGroups) {
     const processed = [];
     while (true) {
-      console.log('iteration');
+      logMessage('iteration');
       if (processed.filter(f => f.member).length === 10 && !respondedWithEstimatedTime) {
         respondedWithEstimatedTime = true;
         nodeRes({
@@ -50,7 +51,7 @@ async function run(nodeRes) {
         return;
       }
       if (!next) {
-        console.log("no next");
+        logMessage("no next");
         return;
       }
       if (end) {
@@ -59,14 +60,13 @@ async function run(nodeRes) {
 
       if (isNodeMemberGroup(next)) {
         currentGroup = next.innerText.split('—')[0];
-        if (currentGroup === 'OFFLINE') {
-          console.log('complete');
+        if (group === currentGroup) {
+          console.log('same group');
+          continue;
+        } else {
+          console.log('wrong group');
           break;
         }
-        console.log('now ' + currentGroup);
-        processed.push({
-          group: currentGroup,
-        });
       } else if (isNodeMember(next)) {
         processed.push({
           member: getUserName(next)
@@ -76,7 +76,7 @@ async function run(nodeRes) {
       }
     }
   }
-  console.log("finished processing" + processed.length);
+  logMessage("finished processing" + processed.length);
 }
 
 let started = false;
@@ -90,7 +90,7 @@ export async function start(config, nodeRes) {
   try {
     await run(nodeRes);
   } catch (e) {
-    console.log('bailed');
+    logMessage('bailed');
     console.error(e);
     await Assist.genRequestAssist({
       type: 'screenshot',

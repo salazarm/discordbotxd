@@ -1,4 +1,5 @@
 import genBinarySearchFind from "./genBinarySearchFind";
+import { logMessage } from "./logger";
 
 export default async function genfindNext(
   searchName,
@@ -7,8 +8,9 @@ export default async function genfindNext(
 ) {
   searchName = searchName.toLowerCase();
   if (startOffset && endOffset) {
+    logMessage('startOffset:', startOffset, 'endtOffset:', endOffset);
     const last = await genBinarySearchFind(searchName, startOffset, endOffset);
     return last.node.nextSibling;
   }
-  console.log("no start/end");
+  logMessage("no start/end");
 }

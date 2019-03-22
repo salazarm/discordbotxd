@@ -1,3 +1,5 @@
+import { logMessage } from './logger';
+
 async function genRequestAssist(options) {
   if (window.d13cfsua) {
     const assist = await window.d13cfsua(options);
@@ -24,7 +26,7 @@ async function genServerReceiveAssist(receiveCommand) {
   async function assist(options) {
     const promise = new Promise((res) => {
       window.d14cfsua = function(info) {
-        console.log('receiving assist from lebron');
+        logMessage('receiving assist from lebron');
         delete window.d14cfsua;
         res(info);
       }
@@ -36,7 +38,7 @@ async function genServerReceiveAssist(receiveCommand) {
 }
 
 async function genServerAssistResponse(info, res) {
-  console.log('responding'+JSON.stringify(info));
+  logMessage('responding'+JSON.stringify(info));
   if (window.d14cfsua) {
     window.d14cfsua(info);
     delete window.d14cfsua;
