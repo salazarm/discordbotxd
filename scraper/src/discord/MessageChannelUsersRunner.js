@@ -58,8 +58,15 @@ async function run(nodeRes) {
       }
 
       if (isNodeMemberGroup(next)) {
-        console.log('finished: ' + group);
-        break;
+        currentGroup = next.innerText.split('—')[0];
+        if (currentGroup === 'OFFLINE') {
+          console.log('complete');
+          break;
+        }
+        console.log('now ' + currentGroup);
+        processed.push({
+          group: currentGroup,
+        });
       } else if (isNodeMember(next)) {
         processed.push({
           member: getUserName(next)
