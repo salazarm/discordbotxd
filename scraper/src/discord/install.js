@@ -1,21 +1,26 @@
-import Assist from './Assist';
+import {
+  genServerReceiveAssist,
+  genServerAssistResponse,
+} from './Assist';
 
+import genBinarySearchFind from './genBinarySearchFind';
 import genChannelInfo from './genChannelInfo';
 import genChannels from './genChannels';
-import {start} from './MessageChannelUsersRunner';
+import {start, stop, resume} from './MessageChannelUsersRunner';
 
 let info = {};
 const Driver = {
-  Assist: Assist,
-  setInfo(info) {
-    info = info;
-  },
-  getInfo() {
-    return info;
+  Assist: {
+    genServerReceiveAssist,
+    genServerAssistResponse,
   },
   genChannelInfo: genChannelInfo,
   genChannels: genChannels,
   genMessageChannelUsers: start,
+  genStopMessageChannelUsers: stop,
+  genResumeMessageChannelUsers: resume,
+  genBinarySearchFind: genBinarySearchFind,
+  genServerReceiveAssist: genServerReceiveAssist,
 };
 
 window.document.lemmeinyouwilllose = Driver;

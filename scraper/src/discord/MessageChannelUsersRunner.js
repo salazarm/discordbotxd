@@ -1,8 +1,9 @@
-import Assist from './Assist';
+import {genRequestAssist} from './Assist';
 
-import genNextElement from './genNextElement';
+import genEstimatedUsers from './genEstimatedUsers';
 import genLoadChannel from './genLoadChannel';
 import genMessageUser from './genMessageUser';
+import genNextElement from './genNextElement';
 import genPlaceholdersFinishLoading from './genPlaceholdersFinishLoading';
 import getMemberScrollContainer from './getMemberScrollContainer';
 import getUserName from './getUserName';
@@ -15,7 +16,7 @@ let _runStart;
 let _realStart;
 
 let _config = {};
-const processed = [];
+let processedUsers = {}
 
 let _bail_completely_ = false;
 async function run(nodeRes) {
@@ -28,24 +29,18 @@ async function run(nodeRes) {
   getMemberScrollContainer().scrollTop = 0;
   await genPlaceholdersFinishLoading();
   logMessage('real start');
+  const users = await genEstimatedUsers(_config.includedGroups);
+  nodeRes(users);
   _realStart = performance.now();
-
-  let respondedWithEstimatedTime = false;
   for (const group of _config.includedGroups) {
     const processed = [];
+    processedUsers[group] = processed;
     while (true) {
       logMessage('iteration');
-      if (processed.filter(f => f.member).length === 10 && !respondedWithEstimatedTime) {
-        respondedWithEstimatedTime = true;
-        nodeRes({
-          timePerMessage: Math.ceil((performance.now() - _realStart) / 1000)
-        });
-      }
 
       if (_bail_completely_) {
         return;
       }
-
       let { next, end } = await genNextElement(processed, group);
       if (_bail_completely_) {
         return;
@@ -64,7 +59,7 @@ async function run(nodeRes) {
           console.log('same group');
           continue;
         } else {
-          console.log('wrong group');
+          console.log('wrong group', group, currentGroup);
           break;
         }
       } else if (isNodeMember(next)) {
@@ -81,6 +76,7 @@ async function run(nodeRes) {
 
 let started = false;
 export async function start(config, nodeRes) {
+  console.log('starting messageUsersChannelFn');
   if (started) {
     console.warn('Already started MessageChannelUsers');
     return;
@@ -92,15 +88,11 @@ export async function start(config, nodeRes) {
   } catch (e) {
     logMessage('bailed');
     console.error(e);
-    await Assist.genRequestAssist({
+    await genRequestAssist({
       type: 'screenshot',
       name: 'Error'
     });
   }
-}
-
-export async function pause() {
-  _bail_completely_ = true;
 }
 
 export async function resume() {

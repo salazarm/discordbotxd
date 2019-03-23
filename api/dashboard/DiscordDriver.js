@@ -56,13 +56,9 @@ class Driver {
       const buttonInput = await driver.findElements(by.xpath("//button[@type='submit']"));
       buttonInput[0].click();
 
-      const installFn = await DiscordScraper.genInstallFn();
-      const channels = await driver.executeAsyncScript(
-        installFn,
-        this.id,
-        bot.email,
-        bot.password,
-      );
+      const getChannelsFn = await DiscordScraper.genChannelsFn();
+      const installFn = await DiscordScraper.genInstallFn(getChannelsFn);
+      const channels = await driver.executeAsyncScript(installFn);
       this.botDrivers[bot.email] = driver;
       bots.push({
         email: bot.email,

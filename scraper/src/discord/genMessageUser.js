@@ -45,11 +45,12 @@ export default async function messageUser(userDiv, messageDelay) {
   }
 
   while (performance.now() - lastMessageTS < messageDelay - 2500) {
+    logMessage("waiting before messaging");
     await genNextFrame(60);
   }
   await genNextFrame(Math.random() * 5000);
   lastMessageTS = performance.now();
-  input.value = message;
+  input.value = 'test';
   logMessage("requesting assist for" + getUserName(userDiv));
   await genRequestAssist({type: 'submit_message', input: input});
   // await confirmMessageSent();

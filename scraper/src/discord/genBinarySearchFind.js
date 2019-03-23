@@ -1,4 +1,5 @@
 import genPlaceholdersFinishLoading from './genPlaceholdersFinishLoading';
+import { genRequestAssist } from './Assist';
 import getMemberScrollContainer from './getMemberScrollContainer';
 import getVisibleNodes from './getVisibleNodes';
 import { logMessage } from './logger';
@@ -11,20 +12,35 @@ function getVisibleHeight() {
   return offsetHeight - 100;
 }
 
-export default async function genBinarySearchFind(searchName, lo, hi, deep = 0) {
+export default async function genBinarySearchFind(
+  searchName,
+  lo,
+  hi,
+  deep = 0,
+  guess = null
+) {
   const visibleHeight = getVisibleHeight();
   const mid = Math.floor((lo + hi) / 2);
-  if (hi - lo <= visibleHeight) {
-    logMessage('set lo');
+  if (hi - lo <= visibleHeight || hi > guess && lo < guess) {
+    logMessage('set lo ' + lo);
     getMemberScrollContainer().scrollTop = lo;
+  } else if (guess) {
+    logMessage('set guess ', + guess);
+    getMemberScrollContainer().scrollTop = guess;
   } else {
-    logMessage('set mid');
+    logMessage('set mid ' + mid);
     getMemberScrollContainer().scrollTop = mid;
   }
   try {
     await genPlaceholdersFinishLoading();
   } catch (e) {
-    throw new Error('Failed to load at scroll position '+ scrollPosition + ' with name: '+searchName);
+    console.log('request ErrorInGenPLaceholdersFinishLoading');
+    await genRequestAssist({
+      type: 'screenshot',
+      name: 'error'
+    });
+    console.log('requested');
+    throw new Error('Failed to load at lo: '+lo + ' hi: ' + hi  + ' with name: '+searchName);
   }
   logMessage('placeholders finished loading');
   const visibleNodes = getVisibleNodes(lo, hi);
@@ -48,17 +64,19 @@ export default async function genBinarySearchFind(searchName, lo, hi, deep = 0) 
   const firstMemberName = members[0].member;
   const lastMemberName = members[members.length -1].member;
   if (searchName <= firstMemberName.toLowerCase()) {
-    if (hi - lo <= visibleHeight) {
+    const first = members[0];
+    if (hi - lo <= visibleHeight || guess === lo) {
       logMessage('first in view');
-      return members[0];
+      return first;
     }
-    return await genBinarySearchFind(searchName, lo, mid, deep+1);
+    const newTop = first.top;
+    return await genBinarySearchFind(searchName, lo, newTop, deep+1);
   } else if (searchName <= lastMemberName.toLowerCase()) {
     let lastMember = members[0];
     for (let i = 0, l = members.length; i < l; i++) {
       const memberName = members[i].member;
       if (searchName == memberName) {
-        logMessage("exact");
+        logMessage("exact ", members[i].top, " ",guess, " ", guess ? Math.abs(members[i].top - guess) : 'none');
         return members[i];
       }
       if (searchName < memberName) {
@@ -72,10 +90,11 @@ export default async function genBinarySearchFind(searchName, lo, hi, deep = 0) 
     logMessage('end of the line');
     return lastMember;
   } else {
+    const last = members[members.length - 1];
     if (hi - lo <= visibleHeight) {
       logMessage('last in view');
-      return members[members.length - 1];
+      return last;
     }
-    return await genBinarySearchFind(searchName, mid + 1, hi, deep+1);
+    return await genBinarySearchFind(searchName, last.top, hi, deep+1);
   }
 }

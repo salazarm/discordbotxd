@@ -25,18 +25,23 @@ function getFnBody(fn) {
     .match(/[^{]+\{([\s\S]*)\}$/)[1];
 }
 
+const defaultFn = getFnBody(() => {
+  console.log('installed');
+  if (arguments && arguments[0]) {
+    argument[0]();
+  }
+});
+
 const DiscordScraperAPI = {
-  async genInstallFn() {
+  async genInstallFn(fn) {
     const module = await readModuleFile('../dist/discord.js')
-    const genChannelsFn = await DiscordScraperAPI.genChannelsFn();
-    return module + "\n" + genChannelsFn;
+    return module + "\n" + (fn || defaultFn);
   },
 
   async genChannelsFn() {
     const fn = () => {
       const Driver = window.document.lemmeinyouwilllose;
-      const [token, email, password, nodeRes] = arguments;
-      Driver.setInfo({token, email, password });
+      const nodeRes = arguments[0];
       Driver.genChannels().then(result => {
         nodeRes(result);
       });
@@ -56,13 +61,13 @@ const DiscordScraperAPI = {
   },
 
   async genMessageChannelUsersFn() {
-    const module = await readModuleFile('../dist/discord.js')
     const fn = () => {
+      console.log('genMessageChannelUsersFn');
       const [config, nodeRes] = arguments;
       const Driver = window.document.lemmeinyouwilllose;
-      Driver.genMessageChannelUsers(config, nodeRes)
+      Driver.genMessageChannelUsers(config, nodeRes);
     }
-    return module + "\n" + getFnBody(fn);
+    return getFnBody(fn);
   },
 
   async genReceveAssistRequestFn() {

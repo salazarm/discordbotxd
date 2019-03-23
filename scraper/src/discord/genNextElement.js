@@ -5,32 +5,47 @@ import getMemberScrollContainer from './getMemberScrollContainer'
 import { logMessage } from "./logger";
 import logInfo from './logInfo';
 
+let same = 0;
 export default async function genNextElement(processed, currentGroup) {
-  if (!processed.length) {
-    // First iteration... use the first div...
-    // Skip the div added for lazy scrolling go to index 1.
-    logMessage(getMemberScrollContainer());
-    const next = getMemberScrollContainer().children[1];
-    logMessage("first,", next.innerHTML);
-    return { next: next };
-  }
-  const prev = processed[processed.length - 1];
-  logMessage("on prev" + logInfo(prev));
+  const prev = processed.length ? processed[processed.length - 1] : {};
+  logMessage("on prev", processed.length, logInfo(prev), currentGroup);
 
   const name = typeof prev.member === "string" ? prev.member : "";
-  logMessage('genCurrentChannelInfo');
   const channelInfo = await genCurrentChannelInfo("ONLINE");
+  const beforePrev = processed.length > 1 ? processed[processed.length - 2] : {};
+
+  if (prev.member && beforePrev.member && prev.member === beforePrev.member) {
+    same ++
+  } else {
+    same = 0;
+  }
 
   let attempt = 0;
   let next;
   while (attempt++ < 10) {
-    logMessage('attempt ', attempt);
     try {
       const [startOffset, endOffset] = getGroupOffsets(channelInfo, currentGroup);
-      next = await genFindNext(name, startOffset, endOffset);
+      const guess = prev.top ? prev.top : startOffset + 41 * processed.length;
+      next = await genFindNext(name, startOffset, endOffset, guess);
+      let copy = same;
+      while (copy-- > 0) {
+        logMessage('same', same, name)
+        if (!next.nextSibling) {
+          getMemberScrollContainer().scrollTop += 300;
+          await genPlaceholdersFinishLoading();
+          if (!next.nextSibling) {
+            // IMPOSSIBRU?!?!?!?!
+            throw new Error("No next sibling after same??");
+          }
+        }
+        next = next.nextSibling;
+      }
       break;
     } catch (e) {
-      logMessage(e.message);
+      logMessage('genNextElement failed attempt', e.message);
+      if (attempt === 10) {
+        throw e;
+      }
     }
   }
 

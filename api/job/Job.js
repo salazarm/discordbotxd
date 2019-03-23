@@ -28,6 +28,7 @@ class Job  {
     const bot = params.bot;
     const driver = this.driver;
 
+    console.log('get login');
     await driver.get('https://discordapp.com/login');
     await driver.wait(webdriver.until.titleContains('Discord'), 10000);
     const emailInput = await driver.findElements(by.xpath("//input[@type='email']"));
@@ -37,51 +38,54 @@ class Job  {
 
     const buttonInput = await driver.findElements(by.xpath("//button[@type='submit']"));
     buttonInput[0].click();
+    console.log('click');
 
+    const installFn = await DiscordScraper.genInstallFn();
     const messageUsersChannelFn = await DiscordScraper.genMessageChannelUsersFn();
-    console.log('messageUsersChannel with:', params);
-    const res = await driver.executeAsyncScript(
-      messageUsersChannelFn,
-      params
-    );
-    this.assist(driver);
+
+    await driver.executeScript(installFn);
+    console.log("driver.executeScript(messageUsersChannelFn, params);");
+    const res = await driver.executeAsyncScript(messageUsersChannelFn, params);
+    this.assist();
     return res;
   }
 
-  async assist(driver) {
+  async assist() {
     let exit = false;
-    while (!exit) {
+    let i = 0;
+    while (!exit && ++i) {
       try {
         exit = await this.assistImpl();
         // do nothing if its a script timeout
       } catch (error) {
-        console.log("Assist hit error", error);
+        console.log("Assist hit error", i, error);
       }
     }
   }
 
   async assistImpl() {
-    console.log('waiting for command');
+    const driver = this.driver;
     const receiveAssist = await DiscordScraper.genReceveAssistRequestFn();
     const command = await driver.executeAsyncScript(receiveAssist);
+    console.log('got command', command.type);
     if (command.exit) {
       return true;
     }
     if (command.type === 'submit_message') {
-      console.log('submit_message_command');
       // const input = await driver.findElements(by.xpath(QUICK_INPUT));
       // await input[0].sendKeys(Keys.ENTER);
       const response = await DiscordScraper.genAssistRequestResponseFn();
       driver.executeAsyncScript(
-        messageUsersChannelAssistResponse,
+        response,
         {success: true},
       );
     }
     if (command.type === 'screenshot') {
       console.log('took screenshot');
       const screenShot = await driver.takeScreenshot();
-      fs.writeFileSync(command.name + '.png', new Buffer(screenShot, 'base64'));
+      fs.writeFileSync(command.name + '.png', Buffer.from(screenShot, 'base64'));
     }
+    return false;
   }
 }
 
