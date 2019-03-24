@@ -20,8 +20,7 @@ export default async function genPlaceholdersFinishLoading() {
       }
       if (!ms) {
         logMessage('MemberScrollContainer missing after 30 seconds');
-      }
-      if (!ms.children || !ms.children.length) {
+      } else if (!ms.children || !ms.children.length) {
         logMessage('MemberScrollContainer unknown children after 30 seconds');
       }
       if (gp) {

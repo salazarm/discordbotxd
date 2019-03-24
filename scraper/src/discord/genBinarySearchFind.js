@@ -1,3 +1,4 @@
+import genGoToScrollTopSlowly from './genGoToScrollTopSlowly';
 import genPlaceholdersFinishLoading from './genPlaceholdersFinishLoading';
 import { genRequestAssist } from './Assist';
 import getMemberScrollContainer from './getMemberScrollContainer';
@@ -23,13 +24,13 @@ export default async function genBinarySearchFind(
   const mid = Math.floor((lo + hi) / 2);
   if (hi - lo <= visibleHeight || hi > guess && lo < guess) {
     logMessage('set lo ' + lo);
-    getMemberScrollContainer().scrollTop = lo;
+    await genGoToScrollTopSlowly(lo);
   } else if (guess) {
     logMessage('set guess ', + guess);
-    getMemberScrollContainer().scrollTop = guess;
+    await genGoToScrollTopSlowly(guess);
   } else {
     logMessage('set mid ' + mid);
-    getMemberScrollContainer().scrollTop = mid;
+    await genGoToScrollTopSlowly(mid);
   }
   try {
     await genPlaceholdersFinishLoading();

@@ -53,6 +53,7 @@ const DiscordScraperAPI = {
     const fn = () => {
       const Driver = window.document.lemmeinyouwilllose;
       const [channel, nodeRes] = arguments;
+      console.log('genChannelInfo');
       Driver.genChannelInfo(channel).then(result => {
         nodeRes(result);
       });

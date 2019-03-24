@@ -87,7 +87,7 @@ class Driver {
     );
   }
 
-  async getChannelInfo(dashboardId, channel) {
+  async getChannelInfo(dashboardId, channel) { 
     if (this.settingUp) {
       await this.settingUp;
     }
@@ -148,8 +148,11 @@ module.exports = {
   },
 
   async getChannelInfo(user, dashboardId, channelPath) {
+    console.log('getChannelInfo');
     const driver = await this.getOrCreate(user);
+    console.log('got driver');
     const info = await driver.getChannelInfo(dashboardId, channelPath);
+    console.log('got info', info);
     return info;
   },
 

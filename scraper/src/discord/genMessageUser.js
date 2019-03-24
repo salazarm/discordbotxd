@@ -7,7 +7,9 @@ import triggerRightClickEvent from './triggerRightClickEvent';
 
 let lastMessageTS = 0;
 
-export default async function messageUser(userDiv, messageDelay) {
+const MESSAGE_DELAY = 30000;
+
+export default async function messageUser(userDiv) {
   let contextMenu;
   let _start = performance.now();
   do {
@@ -44,7 +46,7 @@ export default async function messageUser(userDiv, messageDelay) {
     await genNextFrame(60);
   }
 
-  while (performance.now() - lastMessageTS < messageDelay - 2500) {
+  while (performance.now() - lastMessageTS < MESSAGE_DELAY - 2500) {
     logMessage("waiting before messaging");
     await genNextFrame(60);
   }

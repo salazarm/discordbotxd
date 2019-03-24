@@ -14,8 +14,8 @@ module.exports = function(app) {
       messageDelay,
       pathname,
       bot: {
-        email: 'salazarm93@gmail.com',
-        password: '1234567890bot',
+        email: 'deadmasterdeadmaster@yahoo.com',
+        password: '38533853',
       },
     });
     return await job.start();

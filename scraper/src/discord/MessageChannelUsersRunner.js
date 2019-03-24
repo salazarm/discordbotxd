@@ -66,7 +66,7 @@ async function run(nodeRes) {
         processed.push({
           member: getUserName(next)
         });
-        await genMessageUser(next, _config.messageDelay);
+        await genMessageUser(next);
         await genLoadChannel(_config.pathname);
       }
     }

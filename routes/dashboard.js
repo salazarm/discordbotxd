@@ -6,8 +6,8 @@ const hardcodedUser = {
   id: 1,
   name: 'test',
   bots: [{
-    email: 'salazarm93@gmail.com',
-    password: '1234567890bot',
+    email: 'deadmasterdeadmaster@yahoo.com',
+    password: '38533853',
   }],
 };
 

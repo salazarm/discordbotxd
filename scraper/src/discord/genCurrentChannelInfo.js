@@ -3,6 +3,7 @@ import genNextFrame from "./genNextFrame";
 import genPlaceholdersFinishLoading from "./genPlaceholdersFinishLoading";
 
 export default async function genCurrentChannelInfo(end) {
+  console.log('in genCurrentChannelInfo');
   const seen = {};
   const memberGroups = [];
   const memberScrollContainer = getMemberScrollContainer();
