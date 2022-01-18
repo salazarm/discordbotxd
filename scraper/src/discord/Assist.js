@@ -15,8 +15,8 @@ export async function genRequestAssist(options) {
 }
 
 export async function genServerReceiveAssist(receiveCommand) {
-  if (window.d13cfsua) {
-    window.d13cfsua(assist)
+  if (window.clientQueueAction) {
+    window.clientQueueAction(assist)
   }
   window.clientQueueAction = function(options) {
     delete window.clientQueueAction;
