@@ -37,7 +37,7 @@ export async function genServerReceiveAssist(receiveCommand) {
 }
 
 export async function genServerAssistResponse(info, res) {
-  if (window.d14cfsua) {
+  if (window.serverResponse) {
     window.serverResponse(info);
     res({success: true});
   } else {
